@@ -1,23 +1,175 @@
+# MIN-Tube-Pro
 
-# ver1.4.2
-人気ホラーゲームR.E.P.Oをできるように(壊れてるのは気のせい、そうだ気のせいだ)、ブロスタ、ダダサバイバー、サンズ戦、ジオメトリーダッシュ,あつ森、クッキークリッカーなどの人気ゲームを追加<br>
-クオリティが極限まで高いゲームをその他10個ほど追加<br>
-その他動かないゲーム修正<br>
-動画サーバーElixirをスマホからでも使えるように強化<br>
-新しいプロキシGUSTを追加
-# ver1.4.1
-claudeが無料で使えるように変更、認証すれば使えるようになります<br>
-portable版のマイクラを追加<br>
-shortの視聴を埋め込みで可能に変更、これによってショートの閲覧ができます<br>
-新動画サーバーElixir-Network追加。Wispサーバーの最適化により動画の読み込みを高速化しています
-# ver1.4.0
-Elixir-Networkと統合。
-# Elixir-Networkについて
-rhenrywが作成したembeddrという静的なプロキシです。UVのbareサーバーは使わず、ランマーヘッドやScamjetに近いWispというサーバーを使っています。多くのサーバーを経由するため落ちる心配がありません（今のところは） <br>
-サーバー　wss://wisp.rhw.one/　で接続出来た場合のみYoutubeの動画を再生することができます。 <br>
-エンドポイント /embed.html#URL　（/proxy/embed.html#URL)であらゆるウェブサイトの検閲からのがれることができます。<br>
-## 開発者向け　技術的な概要について
-静的なプロキシはほとんどの場合、コード内に直接ルートをとることを想定してそのままのパスでファイルへ接続します。<br>そのため自分のプロジェクトにプロキシを追加しようとしてもCannot get errorが起きます。<br>これを回避するためにはindex.js側でパスを書き変え、正しいディレクトリの中にあるファイルを返すように指示しなければいけません。例えばMIN-Tube-Proでは下のような技術を使っています<br>
+CG / YouTube web app.  
+「MIN-Tube-Pro」は、YouTube や動画視聴をより快適にするための Web アプリです。  
+ブラウザからすぐにアクセスでき、PC・スマホ問わず軽量に動作することを目指しています。
+
+### デモ
+- https://min-tube2.vercel.app
+- https://min-tube-pro.vercel.app
+- https://min-tube-pro-roan.vercel.app
+
+---
+
+## 特徴
+
+- **軽量:** HTML + JavaScript ベースのシンプル構成
+- **ホスティングしやすい:** Vercel / Render / Railway などの PaaS に対応しやすい構造
+- **Node.js 対応:** `index.js` + `Procfile` によるサーバー起動が可能
+- **設定ファイル付き:** `render.yaml` / `railway.json` などのデプロイ設定ファイルを同梱
+
+---
+
+## デプロイ
+
+ワンクリックで自分の環境にデプロイできます。
+
+### Vercel
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+
+### Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+
+### Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?templateUrl=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+
+---
+
+## 必要要件
+
+- **Node.js** (推奨: LTS)
+- **npm** または **yarn**
+
+---
+
+## ローカル開発
+
+```bash
+# 依存関係のインストール
+npm install
+
+# 開発サーバー起動
+npm start
+# または
+node index.js
+```
+
+---
+
+## 更新履歴
+
+### ver1.4.2
+- 人気ホラーゲーム「R.E.P.O」をはじめ、ブロスタ、ダダサバイバー、サンズ戦、ジオメトリーダッシュ、あつ森、クッキークリッカーなどの人気ゲームを追加(「R.E.P.O」が、壊れてるのは気のせい、そうだ気のせいだ）
+- クオリティが極限まで高いゲームをその他10個ほど追加
+- 動作しなかったゲームの修正
+- 動画サーバー Elixir をスマートフォンからでも使えるように強化
+- 新しいプロキシ「GUST」を追加
+
+### ver1.4.1
+- Claude が無料で使えるように変更（認証が必要です）
+- Portable 版のマインクラフトを追加
+- ショート動画の埋め込み視聴に対応し、ショートの閲覧が可能に
+- 新動画サーバー Elixir-Network を追加。Wisp サーバーの最適化により動画の読み込みを高速化
+
+### ver1.4.0
+- Elixir-Network と統合（詳細は[Elixir-Network について](#elixir-network-について)を参照）
+
+### ver1.3.5
+- Abyss V5 と統合（詳細は[Abyss V5 について](#abyss-v5-について)を参照）
+- アニメ視聴ページへのルートを修正
+
+### ver1.3.0
+**新機能**
+- ホーム画面で「ホーム画面に追加」することで擬似アプリ化（Apple のみ）
+- アニメ視聴ページを追加
+
+**MINTube の変更点**
+- サムネイル取得方法の切り替えが可能に
+- ショート動画の視聴に対応（失敗することがあります）
+- 検索候補を表示
+
+**ゲーム関連の変更点**
+- ゲームのサムネイルを追加（順次追加）
+- 複数のゲームを追加
+- ゲーム一覧の表示方法を切り替え可能に
+
+### ver1.2.4
+- ゲームを6つ追加
+- ゲームを A〜Z 順で読み込むように変更
+
+### ver1.2.3
+**新機能**
+- チャンネル登録機能を追加
+- チャンネル登録や閲覧履歴からホームの動画が変わるように変更
+
+**バグ修正**
+- 設定で GoogleVideo 以外に設定したとき、再生時に一瞬読み込まれてしまう問題を修正
+- アカウントページ以外でアカウント画像が表示されない問題を修正
+- ホームで下スクロールしても新たなコンテンツが読み込まれない問題を修正
+
+**変更点**
+- ゲームを1つ追加
+
+### ver1.2.2
+- しあtube を追加
+- 公式URL一覧に応答速度を表示
+
+### ver1.2.1
+- ゲームを3つ追加
+- wista を追加
+
+### ver1.2.0
+- 視聴履歴を追加
+- 高評価した動画の一覧を表示可能に
+- 個人用の再生リストを追加
+- デザインを YouTube 風に変更
+- モバイル UI に対応（MIN-Tube-Pro のみ）
+- チャンネル閲覧を強化
+- ゲームを2つ追加
+
+### ver1.1.1
+- MIN-Tube-Pro でライト / ダークモードの切り替えが可能に
+- 設定から再生方法を変更可能に
+- チャンネル閲覧に対応（テスト段階）
+- ゲームを6つ追加
+
+### ver1.1.0
+- 複数のゲームを追加
+- MIN-Tube-Pro のホーム画面を見やすく変更
+
+### ver1.0.4
+- コメントが表示されないバグを修正
+- Youtube-search-api で動画IDを検索し、タイトルとチャンネル名を取得する方式に変更
+
+### ver1.0.3
+- タイトルとチャンネル名の取得を自動化し、読み込みを高速化
+
+### ver1.0.2
+- siawaseok 様の API と MIN-Tube2 の API を `Promise.any()` で並列取得する方式に変更
+- どちらかの API が落ちていても取得できるため、Invidious 依存を排除し、動画メタデータ取得の成功率が大幅に向上
+
+### ver1.0.1
+- YouTubeEducation の埋め込みパラメータを woolisbest 様と siawaseok 様の GitHub リポジトリから自動取得する方式に変更
+- 手動管理が不要になり、常に最新の Education 用パラメータを反映可能に
+
+---
+
+## 技術詳細
+
+### Elixir-Network について
+rhenryw が作成した embeddr という静的なプロキシです。UV の bare サーバーは使わず、ランマーヘッドや Scamjet に近い Wisp というサーバーを使用しています。多くのサーバーを経由するため、今のところ落ちる心配がありません。
+
+- サーバー: `wss://wisp.rhw.one/` に接続できた場合のみ YouTube 動画を再生可能
+- エンドポイント: `/embed.html#URL` （`/proxy/embed.html#URL`）であらゆるウェブサイトの検閲を回避できます
+
+#### 開発者向け 技術的な概要
+静的なプロキシは多くの場合、コード内で直接ルートを指定し、そのままのパスでファイルへ接続します。そのため、自分のプロジェクトにプロキシを追加しようとすると `Cannot get error` が発生することがあります。これを回避するには、`index.js` 側でパスを書き換え、正しいディレクトリ内のファイルを返すように指示する必要があります。
+
+MIN-Tube-Pro では以下のような技術を使用しています。
+
 ```js
 const PROXY_ENDPOINTS = [
   'prxy',
@@ -43,163 +195,44 @@ app.use((req, res, next) => {
   next();
 });
 ```
-<br>エンドポイントを絞って関数を制限することで、サーバーにかかる負荷を減らすことができます。<br>ぜひ使ってみてください！
 
+エンドポイントを絞って関数を制限することで、サーバー負荷を減らせます。
 
+### Abyss V5 について
+もともとは jacksoncraft859 が作成した静的な UV プロキシです。bare サーバーが動かなくなっていたため、dinguschan-owo のサーバーを組み込んで再構成しました。デザインやバグ修正は MIN-Tube-Pro に搭載するために改変されています。  
+このプロキシを単体で利用したい場合は、以下のリポジトリを推奨します。  
+https://github.com/mino-hobby-pro/UV-Static_Netlify
 
-# ver1.3.5
-- Abyss V5と統合
-# Abyss V5について
-もともとはjacksoncraft859が作成した静的なUVプロキシです。bareサーバーが動かなくなっていたので、dinguschan-owoのサーバーを組み込んで作りました。デザインやバグ修正などはMIN-Tube-Proに搭載するためだけに改変されています。このプロキシを単体として展開したい場合は<br>https://github.com/mino-hobby-pro/UV-Static_Netlify<br>を利用することを推奨します。旧サイト開発者<br>dinguschan-owo<br>jacksoncraft859<br>に感謝します。
-  
-- アニメの視聴ページに飛ぶルートの修正を行いました
-
-# ver1.3.0
-**新機能**
-- ホーム画面でホーム画面に追加をすることで擬似アプリ化されるように(appleのみ)
-- アニメの視聴ページを追加
-
-**MINTubeの変更点**
-- サムネ取得方法の変更を可能に
-- ショート動画が見れるように(よく失敗する)
-- 検索候補が表示されるように
-
-**ゲーム関連の変更点**
-- ゲームのサムネを追加(順次追加)
-- 複数個のゲームを追加
-- ゲーム一覧の表示方法の切り替えを可能に
- 
-# ver1.2.4
-- ゲームを6つ追加
-- ゲームを読み込んだ時A〜Zで読み込まれるように
-
-# ver1.2.3
-**新機能**
-- チャンネル登録機能を追加
-- チャンネル登録や閲覧履歴からホームの動画が変わるように変更
-
-**バグ修正**
-- 設定からGoogleVideo以外に設定したときでも再生時に一瞬読み込まれるバグ
-- アカウントページ以外でアカウントの画像が表示されないバグ
-- ホームで下スクロールしても新たな読み込みができないバグ<br>
-変更点<br>
--ゲームを一つ追加
-# ver1.2.2
-- しあtubeを追加
-- 公式URL一覧に応答速度を追加
-
-# ver1.2.1
-変更点
-- ゲームを3つ追加
-- wista追加
-
-#  ver1.2.0
-変更点
-- 視聴履歴を追加
-- 高評価した動画を見れるように
-- 個人のみの再生リストを追加
-- デザインをYoutube風に変更
-- モバイルのUIに対応(MIN-Tube-Proのみ)
-- チャンネルの閲覧を強化しました
-- ゲームを2つ追加
-#  ver1.1.1
-変更点
-
-- MIN-Tube-Proのライト&ダークモードの変更を可能にしました
-- 設定から再生方法を変更可能しました
-- チャンネルの閲覧を可能にしました(テスト段階)
-- 6つのゲームを追加
-
-#  ver1.1.0
-変更点
-
-- 複数のゲームを追加されました
-- MIN-Tube-Proのホーム画面を見やすく変更しました
-
-#  ver1.0.4
-コメントが表示されないバグを修正しました。
-Youtube-search-apiで動画IDを検索、タイトルとチャンネル名を取得する仕様に変更しました。
-
-# ver1.0.3
-変更点
-
-タイトルとチャンネル名の取得自動化により読み込みが早くなりました。
-
-# ver1.0.2
-変更点
-
-siawaseok 様の API と MIN-Tube2 の API を
-Promise.any() を用いて 並列取得する方式に変更
-
-どちらか一方が落ちていても、もう片方から取得できるため
-Invidious 依存を完全に排除した堅牢な設計に進化
-
-API 障害に強く、動画メタデータ取得の成功率が大幅に向上
-
-
-# ver1.0.1
-変更点
-
-YouTubeEducation の埋め込みパラメータを
-woolisbest 様 と siawaseok 様 の GitHub リポジトリから取得する方式に変更
-
-これにより、手動でパラメータを管理する必要がなくなり、
-最新の Education 用パラメータを自動で反映できる設計に改善
-
-# MIN-Tube-Pro
-
-CG / YouTube web app.  
-「MIN-Tube-Pro」は、YouTube や動画視聴をより快適にするための Web アプリです。  
-ブラウザからすぐにアクセスでき、PC・スマホ問わず軽量に動作することを目指しています。
-
-### デモ
-- https://min-tube2.vercel.app
-- https://min-tube-pro.vercel.app
-- https://min-tube-pro-roan.vercel.app
-  
 ---
+## 開発メンバー
 
-## デプロイ
-
-ワンクリックで自分の環境にデプロイできます。
-
-### Vercel
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
-
-### Render
-
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
-
-### Railway
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?templateUrl=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+・<a href="https://github.com/mino-hobby-pro">mino-hobby-pro</a>  
+・<a href="https://github.com/myproxy0108-prog">myproxy0108-prog</a>  
+・<a href="https://github.com//raku-ringo">raku-ringo</a>  
+・<a href="https://github.com/Sou930">Sou930</a>  
+・<a href="https://github.com/KA1121Studio">KA1121Studio</a>  
+・<a href="https://github.com/woolisbest">woolisbest</a>  
+・<a href="https://github.com/kiki riki">kiki riki</a>  
 
 ---
 
-## 特徴
+## 謝辞
 
-- **軽量:** HTML + JavaScript ベースのシンプル構成
-- **ホスティングしやすい:** Vercel / Render / Railway などの PaaS に対応しやすい構造
-- **Node.js 対応:** `index.js` + `Procfile` によるサーバー起動が可能
-- **設定ファイル付き:** `render.yaml` / `railway.json` などのデプロイ設定ファイルを同梱
+以下の開発者・プロジェクトに感謝します。
 
----
-
-## 必要要件
-
-- **Node.js** (推奨: LTS)
-- **npm** または **yarn**
+- dinguschan-owo
+- jacksoncraft859
+- woolisbest
+- siawaseok
+- その他、本プロジェクトを支えてくださったすべての方々
 
 ---
 
-## ローカル開発
+<div align="center">
 
-```bash
-# 依存関係のインストール
-npm install
+### MIN-Tube-Pro™
 
-# 開発サーバー起動
-npm start
-# または
-node index.js
+© 2026 <a href="https://github.com/mino-hobby-pro">mino-hobby-pro</a>  
+All rights reserved.
+
+</div>
