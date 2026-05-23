@@ -1,13 +1,11 @@
-# MIN-Tube-Pro
+# yuudai-web3
 
 CG / YouTube web app.  
-「MIN-Tube-Pro」は、YouTube や動画視聴をより快適にするための Web アプリです。  
+「yuudai-web3」は、YouTube や動画視聴をより快適にするための Web アプリです。  
 ブラウザからすぐにアクセスでき、PC・スマホ問わず軽量に動作することを目指しています。
 
 ### デモ
-- https://min-tube2.vercel.app
-- https://min-tube-pro.vercel.app
-- https://min-tube-pro-roan.vercel.app
+- https://yuudai-web3.vercel.app
 
 ---
 
@@ -26,15 +24,15 @@ CG / YouTube web app.
 
 ### Vercel
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/kamikun0318/yuudai-web-3-1)
 
 ### Render
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/kamikun0318/yuudai-web-3-1)
 
 ### Railway
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?templateUrl=https://github.com/mino-hobby-pro/MIN-Tube-Pro)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?templateUrl=https://github.com/kamikun0318/yuudai-web-3-1)
 
 ---
 
@@ -60,13 +58,19 @@ node index.js
 ---
 
 ## 更新履歴
+### ver1.4.8
+- yuudai-web3へのブランド統一
+- Ballistic と EaglercraftJava ゲームを追加
+- ロゴとテキストを完全に更新
+
 ### ver1.4.7
 - webLLMを使用してAIをそのデバイスに建てて使えるように<br>
 - ビデオ通話をできるように<br>
 - Elixir-Networkを利用した漫画と映画鑑賞<br>
 - gameの人気順の可視化
+
 ### ver1.4.2
-- 人気ホラーゲーム「R.E.P.O」をはじめ、ブロスタ、ダダサバイバー、サンズ戦、ジオメトリーダッシュ、あつ森、クッキークリッカーなどの人気ゲームを追加(「R.E.P.O」が、壊れてるのは気のせい、そうだ気のせいだ）
+- 人気ホラーゲーム「R.E.P.O」をはじめ、ブロスタ、ダダサバイバー、サンズ戦、ジオメトリーダッシュ、あつ森、クッキークリッカーなどの人気ゲームを追加
 - クオリティが極限まで高いゲームをその他10個ほど追加
 - 動作しなかったゲームの修正
 - 動画サーバー Elixir をスマートフォンからでも使えるように強化
@@ -79,10 +83,10 @@ node index.js
 - 新動画サーバー Elixir-Network を追加。Wisp サーバーの最適化により動画の読み込みを高速化
 
 ### ver1.4.0
-- Elixir-Network と統合（詳細は[Elixir-Network について](#elixir-network-について)を参照）
+- Elixir-Network と統合
 
 ### ver1.3.5
-- Abyss V5 と統合（詳細は[Abyss V5 について](#abyss-v5-について)を参照）
+- Abyss V5 と統合
 - アニメ視聴ページへのルートを修正
 
 ### ver1.3.0
@@ -90,153 +94,37 @@ node index.js
 - ホーム画面で「ホーム画面に追加」することで擬似アプリ化（Apple のみ）
 - アニメ視聴ページを追加
 
-**MINTube の変更点**
-- サムネイル取得方法の切り替えが可能に
-- ショート動画の視聴に対応（失敗することがあります）
-- 検索候補を表示
-
-**ゲーム関連の変更点**
-- ゲームのサムネイルを追加（順次追加）
-- 複数のゲームを追加
-- ゲーム一覧の表示方法を切り替え可能に
-
-### ver1.2.4
-- ゲームを6つ追加
-- ゲームを A〜Z 順で読み込むように変更
-
-### ver1.2.3
-**新機能**
-- チャンネル登録機能を追加
-- チャンネル登録や閲覧履歴からホームの動画が変わるように変更
-
-**バグ修正**
-- 設定で GoogleVideo 以外に設定したとき、再生時に一瞬読み込まれてしまう問題を修正
-- アカウントページ以外でアカウント画像が表示されない問題を修正
-- ホームで下スクロールしても新たなコンテンツが読み込まれない問題を修正
-
-**変更点**
-- ゲームを1つ追加
-
-### ver1.2.2
-- しあtube を追加
-- 公式URL一覧に応答速度を表示
-
-### ver1.2.1
-- ゲームを3つ追加
-- wista を追加
-
-### ver1.2.0
-- 視聴履歴を追加
-- 高評価した動画の一覧を表示可能に
-- 個人用の再生リストを追加
-- デザインを YouTube 風に変更
-- モバイル UI に対応（MIN-Tube-Pro のみ）
-- チャンネル閲覧を強化
-- ゲームを2つ追加
-
-### ver1.1.1
-- MIN-Tube-Pro でライト / ダークモードの切り替えが可能に
-- 設定から再生方法を変更可能に
-- チャンネル閲覧に対応（テスト段階）
-- ゲームを6つ追加
-
-### ver1.1.0
-- 複数のゲームを追加
-- MIN-Tube-Pro のホーム画面を見やすく変更
-
-### ver1.0.4
-- コメントが表示されないバグを修正
-- Youtube-search-api で動画IDを検索し、タイトルとチャンネル名を取得する方式に変更
-
-### ver1.0.3
-- タイトルとチャンネル名の取得を自動化し、読み込みを高速化
-
-### ver1.0.2
-- siawaseok 様の API と MIN-Tube2 の API を `Promise.any()` で並列取得する方式に変更
-- どちらかの API が落ちていても取得できるため、Invidious 依存を排除し、動画メタデータ取得の成功率が大幅に向上
-
-### ver1.0.1
-- YouTubeEducation の埋め込みパラメータを woolisbest 様と siawaseok 様の GitHub リポジトリから自動取得する方式に変更
-- 手動管理が不要になり、常に最新の Education 用パラメータを反映可能に
-
 ---
 
 ## 技術詳細
 
 ### Elixir-Network について
-rhenryw が作成した embeddr という静的なプロキシです。UV の bare サーバーは使わず、ランマーヘッドや Scamjet に近い Wisp というサーバーを使用しています。多くのサーバーを経由するため、今のところ落ちる心配がありません。
-
-- サーバー: `wss://wisp.rhw.one/` に接続できた場合のみ YouTube 動画を再生可能
-- エンドポイント: `/embed.html#URL` （`/proxy/embed.html#URL`）であらゆるウェブサイトの検閲を回避できます
-
-#### 開発者向け 技術的な概要
-静的なプロキシは多くの場合、コード内で直接ルートを指定し、そのままのパスでファイルへ接続します。そのため、自分のプロジェクトにプロキシを追加しようとすると `Cannot get error` が発生することがあります。これを回避するには、`index.js` 側でパスを書き換え、正しいディレクトリ内のファイルを返すように指示する必要があります。
-
-MIN-Tube-Pro では以下のような技術を使用しています。
-
-```js
-const PROXY_ENDPOINTS = [
-  'prxy',
-  'baremux',
-  'epoxy',
-  'libcurl',
-  'register-sw.mjs',
-  'uv'
-];
-app.use('/proxy', express.static(PROXY_DIR));
-
-app.use((req, res, next) => {
-  const fileName = req.path.replace(/^\//, '');
-
-  if (PROXY_ENDPOINTS.includes(fileName)) {
-    const targetPath = path.join(PROXY_DIR, fileName);
-
-    if (fs.existsSync(targetPath) && fs.lstatSync(targetPath).isFile()) {
-      return res.sendFile(targetPath);
-    }
-  }
-
-  next();
-});
-```
-
-エンドポイントを絞って関数を制限することで、サーバー負荷を減らせます。
+高速で安定した動画ストリーミングプロキシ
 
 ### Abyss V5 について
-もともとは jacksoncraft859 が作成した静的な UV プロキシです。bare サーバーが動かなくなっていたため、dinguschan-owo のサーバーを組み込んで再構成しました。デザインやバグ修正は MIN-Tube-Pro に搭載するために改変されています。  
+UV ベースの静的プロキシ
+
 このプロキシを単体で利用したい場合は、以下のリポジトリを推奨します。  
 https://github.com/mino-hobby-pro/UV-Static_Netlify
 
 ---
 ## 開発メンバー
 
+・<a href="https://github.com/kamikun0318">kamikun0318</a>  
 ・<a href="https://github.com/mino-hobby-pro">mino-hobby-pro</a>  
 ・<a href="https://github.com/myproxy0108-prog">myproxy0108-prog</a>  
-・<a href="https://github.com//raku-ringo">raku-ringo</a>  
+・<a href="https://github.com/raku-ringo">raku-ringo</a>  
 ・<a href="https://github.com/Sou930">Sou930</a>  
 ・<a href="https://github.com/KA1121Studio">KA1121Studio</a>  
 ・<a href="https://github.com/woolisbest">woolisbest</a>  
-・<a href="https://github.com/kiki riki">kiki riki</a>  
-
----
-
-## 謝辞
-
-以下の開発者・プロジェクトに感謝します。
-
-- dinguschan-owo
-- jacksoncraft859
-- woolisbest
-- siawaseok
-- その他、本プロジェクトを支えてくださったすべての方々
 
 ---
 
 <div align="center">
 
-### MIN-Tube-Pro™
+### yuudai-web3
 
-© 2026 <a href="https://github.com/mino-hobby-pro">mino-hobby-pro</a>  
+© 2026 <a href="https://github.com/kamikun0318">kamikun0318</a>  
 All rights reserved.
 
 </div>
