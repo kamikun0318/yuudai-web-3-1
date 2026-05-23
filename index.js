@@ -1406,7 +1406,9 @@ app.get("/helios", (req, res) => {
 app.get("/chat", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chat/chat.html"));
 });
-
+app.get("/yuudai-chat", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "chat/yuudai-chat.html"));
+});
 app.get("/nautilus-os", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "proxy/NautilusOS.html"));
 });
