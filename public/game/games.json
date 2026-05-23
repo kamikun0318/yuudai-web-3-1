@@ -28,6 +28,34 @@
     "status": "done"
   },
   {
+    "key": "ballistic",
+    "name": "Ballistic",
+    "emoji": "🎯",
+    "sub": "シューティング · オンライン",
+    "link": "https://ballistic-2.onrender.com/",
+    "desc": "オンラインシューティングゲーム。敵プレイヤーと戦ってスキルを磨け！",
+    "genre": "shooter",
+    "genreLabel": "シューティング",
+    "players": "オンライン対戦",
+    "tags": ["シューティング", "FPS", "対戦"],
+    "isNew": true,
+    "status": "done"
+  },
+  {
+    "key": "eaglercraft-java",
+    "name": "EaglercraftJava",
+    "emoji": "⛏️",
+    "sub": "サンドボックス · オンライン",
+    "link": "https://eaglercraft-java-1-12.onrender.com/",
+    "desc": "ブラウザで遊べるMinecraft Java Edition！建築もサバイバルも自由自在。",
+    "genre": "sandbox",
+    "genreLabel": "サンドボックス",
+    "players": "オンライン",
+    "tags": ["サンドボックス", "建築", "マイクラ"],
+    "isNew": true,
+    "status": "done"
+  },
+  {
     "key": "brick-breaker",
     "name": "Brick Breaker",
     "emoji": "🧱",
@@ -438,7 +466,7 @@
     "sub": "パズル · 定番",
     "file": "fun/Block Blast.html",
     "image": "img/Blockbrast.jpeg",
-    "desc": "本物です、ブロックを並べて消す爽快パズル！ハイスコアを狙おう。",
+    "desc": "本物です、ブロックを並���て消す爽快パズル！ハイスコアを狙おう。",
     "genre": "puzzle",
     "genreLabel": "パズル",
     "players": "1人プレイ",
