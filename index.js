@@ -1,4 +1,5 @@
 const express = require("express");
+const bcrypt = require('bcryptjs');
 const path = require("path");
 const yts = require("youtube-search-api");
 const fetch = require("node-fetch");
