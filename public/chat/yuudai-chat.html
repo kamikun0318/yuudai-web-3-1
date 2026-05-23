@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Class room</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+  :root {
+    --bg-dark: #1e1f22;
+    --bg-mid: #2b2d31;
+    --bg-light: #313338;
+    --bg-input: #383a40;
+    --bg-hover: #35373c;
+    --accent: #5865f2;
+    --accent-hover: #4752c4;
+    --green: #23a55a;
+    --red: #f23f42;
+    --text: #f2f3f5;
+    --text-muted: #949ba4;
+    --text-dim: #80848e;
+    --border: #3f4147;
+    --sidebar-w: 240px;
+    --channels-w: 220px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg-dark); color: var(--text); height: 100vh; overflow: hidden; display: flex; }
+
+  /* ===== AUTH SCREEN ===== */
+  #authScreen {
+    position: fixed; inset: 0; background: #1e1f22;
+    display: flex; align-items: center; justify-content: center; z-index: 1000;
+  }
+  .auth-box {
+    background: var(--bg-mid); border-radius: 8px; padding: 32px;
+    width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .auth-logo { text-align: center; margin-bottom: 24px; }
+  .auth-logo img { width: 72px; height: 72px; border-radius: 16px; }
+  .auth-logo h1 { font-size: 24px; font-weight: 700; margin-top: 12px; }
+  .auth-logo p { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+  .auth-tabs { display: flex; gap: 0; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .auth-tab {
+    flex: 1; padding: 12px; text-align: center; cursor: pointer;
+    font-weight: 600; font-size: 14px; color: var(--text-muted);
+    border-bottom: 2px solid transparent; transition: 0.2s;
+  }
+  .auth-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .auth-form { display: flex; flex-direction: column; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input {
+    background: var(--bg-dark); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: 4px;
+    font-size: 15px; font-family: inherit; outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus { border-color: var(--accent); }
+  .btn-primary {
+    background: var(--accent); color: #fff; border: none;
+    padding: 12px; border-radius: 4px; font-size: 15px; font-weight: 600;
+    cursor: pointer; transition: background 0.2s; font-family: inherit;
+    margin-top: 4px;
+  }
+  .btn-primary:hover { background: var(--accent-hover); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+  .auth-error { background: rgba(242,63,66,0.15); border: 1px solid var(--red); color: #ff7b7d; padding: 10px 12px; border-radius: 4px; font-size: 13px; display: none; }
+  .auth-error.show { display: block; }
+
+  /* ===== MAIN APP ===== */
+  #app { display: none; width: 100%; height: 100vh; }
+  #app.visible { display: flex; }
+
+  /* Server sidebar */
+  .server-sidebar {
+    width: 72px; background: var(--bg-dark); display: flex;
+    flex-direction: column; align-items: center; padding: 12px 0; gap: 8px;
+    flex-shrink: 0; overflow-y: auto; scrollbar-width: none;
+  }
+  .server-icon {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--bg-mid);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: border-radius 0.2s, background 0.2s;
+    font-size: 20px; font-weight: 700; color: var(--text); position: relative;
+  }
+  .server-icon:hover, .server-icon.active { border-radius: 16px; background: var(--accent); }
+  .server-icon img { width: 48px; height: 48px; border-radius: inherit; object-fit: cover; }
+  .server-divider { width: 32px; height: 2px; background: var(--border); border-radius: 1px; }
+
+  /* Channel sidebar */
+  .channel-sidebar {
+    width: var(--channels-w); background: var(--bg-mid);
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  .channel-header {
+    padding: 16px; border-bottom: 1px solid var(--border);
+    font-weight: 700; font-size: 15px; display: flex;
+    justify-content: space-between; align-items: center;
+  }
+  .channel-list { flex: 1; overflow-y: auto; padding: 8px 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .channel-section-title {
+    padding: 16px 16px 4px; font-size: 11px; font-weight: 700;
+    color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .channel-section-title button {
+    background: none; border: none; color: var(--text-dim); cursor: pointer;
+    font-size: 18px; line-height: 1; padding: 0 2px;
+    transition: color 0.2s;
+  }
+  .channel-section-title button:hover { color: var(--text); }
+  .channel-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; margin: 1px 8px; border-radius: 4px;
+    cursor: pointer; color: var(--text-dim); font-size: 14px;
+    transition: background 0.15s, color 0.15s; position: relative;
+  }
+  .channel-item:hover { background: var(--bg-hover); color: var(--text-muted); }
+  .channel-item.active { background: var(--bg-hover); color: var(--text); }
+  .channel-item .ch-icon { font-size: 16px; flex-shrink: 0; }
+  .channel-item .ch-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .unread-badge {
+    background: var(--red); color: #fff; border-radius: 999px;
+    font-size: 11px; font-weight: 700; padding: 1px 5px; min-width: 18px;
+    text-align: center;
+  }
+  .user-panel {
+    padding: 8px; background: #232428; display: flex;
+    align-items: center; gap: 8px;
+  }
+  .user-avatar-sm {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0; position: relative;
+    overflow: hidden;
+  }
+  .user-avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+  .online-dot {
+    position: absolute; bottom: 0; right: 0;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green); border: 2px solid #232428;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-info .uname { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .user-info .ustatus { font-size: 11px; color: var(--text-dim); }
+  .user-panel-btn {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; padding: 4px; border-radius: 4px; font-size: 16px;
+    transition: color 0.2s, background 0.2s;
+  }
+  .user-panel-btn:hover { color: var(--text); background: var(--bg-hover); }
+
+  /* Main chat area */
+  .chat-area { flex: 1; display: flex; flex-direction: column; background: var(--bg-light); min-width: 0; }
+  .chat-header {
+    height: 48px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 16px; gap: 12px;
+    flex-shrink: 0; font-weight: 600;
+  }
+  .chat-header .ch-type { color: var(--text-dim); font-size: 20px; }
+  .chat-header .ch-title { font-size: 15px; }
+  .chat-header .ch-desc { font-size: 13px; color: var(--text-dim); margin-left: 8px; padding-left: 8px; border-left: 1px solid var(--border); }
+
+  .messages-wrap { flex: 1; overflow-y: auto; padding: 16px 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .msg-group { padding: 2px 16px; display: flex; gap: 16px; align-items: flex-start; }
+  .msg-group:hover { background: rgba(0,0,0,0.06); }
+  .msg-avatar {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+    overflow: hidden; cursor: pointer;
+  }
+  .msg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .msg-body { flex: 1; min-width: 0; }
+  .msg-meta { display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; }
+  .msg-name { font-size: 14px; font-weight: 600; cursor: pointer; }
+  .msg-name:hover { text-decoration: underline; }
+  .msg-time { font-size: 11px; color: var(--text-dim); }
+  .msg-text { font-size: 14px; line-height: 1.5; color: var(--text); word-break: break-word; white-space: pre-wrap; }
+  .msg-image { max-width: 400px; max-height: 300px; border-radius: 8px; margin-top: 8px; cursor: pointer; }
+  .msg-reactions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .reaction-btn {
+    background: var(--bg-mid); border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 8px; font-size: 13px;
+    cursor: pointer; display: flex; align-items: center; gap: 4px;
+    transition: background 0.15s; color: var(--text);
+  }
+  .reaction-btn:hover { background: var(--bg-hover); }
+  .reaction-btn.mine { background: rgba(88,101,242,0.2); border-color: var(--accent); }
+  .add-reaction-btn {
+    background: none; border: 1px solid transparent; border-radius: 999px;
+    padding: 3px 8px; font-size: 14px; cursor: pointer; color: var(--text-dim);
+    transition: all 0.15s; display: none;
+  }
+  .msg-group:hover .add-reaction-btn { display: flex; align-items: center; }
+  .add-reaction-btn:hover { background: var(--bg-mid); border-color: var(--border); color: var(--text); }
+  .msg-actions {
+    display: none; position: absolute; right: 16px; top: 0;
+    background: var(--bg-mid); border: 1px solid var(--border);
+    border-radius: 4px; padding: 4px; gap: 4px;
+  }
+  .msg-group { position: relative; }
+  .msg-group:hover .msg-actions { display: flex; }
+  .msg-action-btn {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; padding: 4px 6px; border-radius: 3px; font-size: 14px;
+    transition: color 0.15s, background 0.15s;
+  }
+  .msg-action-btn:hover { color: var(--text); background: var(--bg-hover); }
+  .msg-action-btn.danger:hover { color: var(--red); background: rgba(242,63,66,0.1); }
+
+  /* Date divider */
+  .date-divider {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 16px 8px; color: var(--text-dim); font-size: 12px;
+  }
+  .date-divider::before, .date-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* Input area */
+  .input-area { padding: 0 16px 16px; flex-shrink: 0; }
+  .input-box {
+    background: var(--bg-input); border-radius: 8px;
+    display: flex; align-items: flex-end; gap: 8px; padding: 8px 12px;
+  }
+  .input-box textarea {
+    flex: 1; background: none; border: none; color: var(--text);
+    font-size: 14px; font-family: inherit; resize: none; outline: none;
+    max-height: 200px; line-height: 1.5; padding: 4px 0;
+  }
+  .input-box textarea::placeholder { color: var(--text-dim); }
+  .input-btn {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 20px; padding: 4px; border-radius: 4px;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  .input-btn:hover { color: var(--text); }
+  .input-btn.send { color: var(--accent); }
+  .input-btn.send:hover { color: #7289da; }
+  #imagePreview { padding: 8px 16px 0; }
+  #imagePreview img { max-height: 120px; border-radius: 8px; }
+  #imagePreview button { background: var(--red); color: #fff; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; margin-left: 8px; font-size: 12px; }
+
+  /* Members sidebar */
+  .members-sidebar {
+    width: 240px; background: var(--bg-mid); padding: 16px 8px;
+    flex-shrink: 0; overflow-y: auto; scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .members-section-title { font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px; margin-bottom: 4px; }
+  .member-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 8px; border-radius: 4px; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .member-item:hover { background: var(--bg-hover); }
+  .member-avatar {
+    width: 32px; height: 32px; border-radius: 50%; background: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0; position: relative;
+    overflow: hidden;
+  }
+  .member-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .member-name { font-size: 14px; color: var(--text-muted); }
+
+  /* Emoji picker */
+  .emoji-picker {
+    position: absolute; background: var(--bg-mid); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px; z-index: 100;
+    display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .emoji-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 4px; border-radius: 4px; transition: background 0.15s; }
+  .emoji-btn:hover { background: var(--bg-hover); }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 200;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg-mid); border-radius: 8px; padding: 24px;
+    width: 100%; max-width: 440px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+  .modal-form { display: flex; flex-direction: column; gap: 12px; }
+  .modal-form input, .modal-form select {
+    background: var(--bg-dark); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 12px; border-radius: 4px;
+    font-size: 14px; font-family: inherit; outline: none;
+  }
+  .modal-form input:focus, .modal-form select:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+  .btn-ghost { background: none; border: none; color: var(--text-muted); padding: 10px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; font-family: inherit; font-weight: 600; transition: background 0.15s; }
+  .btn-ghost:hover { background: var(--bg-hover); }
+
+  /* DM list */
+  .dm-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px; margin: 1px 8px; border-radius: 4px;
+    cursor: pointer; color: var(--text-dim); font-size: 14px;
+    transition: background 0.15s, color 0.15s;
+  }
+  .dm-item:hover { background: var(--bg-hover); color: var(--text-muted); }
+  .dm-item.active { background: var(--bg-hover); color: var(--text); }
+  .dm-avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; overflow: hidden; }
+  .dm-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--bg-mid); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 20px; border-radius: 8px;
+    font-size: 14px; z-index: 9999; opacity: 0;
+    transition: opacity 0.3s; pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; }
+
+  /* Loading */
+  .loading-msg { text-align: center; padding: 32px; color: var(--text-dim); font-size: 14px; }
+
+  /* Image lightbox */
+  .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 9998; cursor: pointer; }
+  .lightbox.open { display: flex; }
+  .lightbox img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
+  @media (max-width: 768px) {
+    .members-sidebar { display: none; }
+    .channel-sidebar { width: 200px; }
+  }
+  @media (max-width: 500px) {
+    .server-sidebar { width: 56px; }
+    .channel-sidebar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <img src="/img/classroom.192.png" onerror="this.style.display='none'">
+      <h1>Class room</h1>
+      <p>ようこそ！ログインして始めましょう</p>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchTab('login')">ログイン</div>
+      <div class="auth-tab" onclick="switchTab('register')">アカウント作成</div>
+    </div>
+    <div class="auth-error" id="authError"></div>
+    <div class="auth-form" id="loginForm">
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" id="loginEmail" placeholder="example@mail.com">
+      </div>
+      <div class="form-group">
+        <label>パスワード</label>
+        <input type="password" id="loginPassword" placeholder="パスワード">
+      </div>
+      <button class="btn-primary" onclick="login()">ログイン</button>
+    </div>
+    <div class="auth-form" id="registerForm" style="display:none">
+      <div class="form-group">
+        <label>ユーザー名</label>
+        <input type="text" id="regUsername" placeholder="ユーザー名（半角英数字）" maxlength="20">
+      </div>
+      <div class="form-group">
+        <label>メールアドレス</label>
+        <input type="email" id="regEmail" placeholder="example@mail.com">
+      </div>
+      <div class="form-group">
+        <label>パスワード</label>
+        <input type="password" id="regPassword" placeholder="8文字以上">
+      </div>
+      <button class="btn-primary" onclick="register()">アカウント作成</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Server sidebar -->
+  <div class="server-sidebar">
+    <div class="server-icon active" title="Class room" onclick="setView('channels')">
+      <img src="/img/classroom.192.png" onerror="this.textContent='C';this.querySelector('img')&&this.querySelector('img').remove()">
+    </div>
+    <div class="server-divider"></div>
+    <div class="server-icon" title="DM" onclick="setView('dm')" style="font-size:18px;">💬</div>
+  </div>
+
+  <!-- Channel sidebar -->
+  <div class="channel-sidebar">
+    <div class="channel-header">
+      <span id="sidebarTitle">Class room</span>
+    </div>
+    <div class="channel-list" id="channelList"></div>
+    <div class="user-panel">
+      <div class="user-avatar-sm" id="myAvatarSm">
+        <div class="online-dot"></div>
+      </div>
+      <div class="user-info">
+        <div class="uname" id="myUsernameSm">-</div>
+        <div class="ustatus">オンライン</div>
+      </div>
+      <button class="user-panel-btn" onclick="logout()" title="ログアウト">🚪</button>
+      <button class="user-panel-btn" onclick="openSettings()" title="設定">⚙️</button>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <span class="ch-type" id="chatIcon">#</span>
+      <span class="ch-title" id="chatTitle">チャンネルを選択</span>
+      <span class="ch-desc" id="chatDesc"></span>
+    </div>
+    <div class="messages-wrap" id="messagesWrap">
+      <div class="loading-msg">チャンネルを選択してください</div>
+    </div>
+    <div id="imagePreview" style="display:none">
+      <img id="previewImg"><button onclick="clearImage()">✕</button>
+    </div>
+    <div class="input-area">
+      <div class="input-box">
+        <button class="input-btn" onclick="triggerImageUpload()" title="画像を送る">📎</button>
+        <textarea id="msgInput" placeholder="メッセージを入力..." rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="input-btn" onclick="toggleEmojiPicker(event)" title="絵文字">😊</button>
+        <button class="input-btn send" onclick="sendMessage()" title="送信">➤</button>
+      </div>
+    </div>
+    <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageSelect(event)">
+  </div>
+
+  <!-- Members sidebar -->
+  <div class="members-sidebar" id="membersSidebar">
+    <div class="members-section-title">メンバー</div>
+    <div id="membersList"></div>
+  </div>
+</div>
+
+<!-- Emoji picker -->
+<div class="emoji-picker" id="emojiPicker" style="display:none"></div>
+
+<!-- Create channel modal -->
+<div class="modal-overlay" id="createChannelModal">
+  <div class="modal">
+    <h2>チャンネルを作成</h2>
+    <div class="modal-form">
+      <input type="text" id="newChannelName" placeholder="チャンネル名">
+      <select id="newChannelType">
+        <option value="public">全体チャンネル</option>
+        <option value="group">グループ</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('createChannelModal')">キャンセル</button>
+      <button class="btn-primary" onclick="createChannel()">作成</button>
+    </div>
+  </div>
+</div>
+
+<!-- New DM modal -->
+<div class="modal-overlay" id="newDmModal">
+  <div class="modal">
+    <h2>DMを開始</h2>
+    <div class="modal-form">
+      <input type="text" id="dmUsername" placeholder="ユーザー名を入力">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('newDmModal')">キャンセル</button>
+      <button class="btn-primary" onclick="startDm()">DMを開始</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add member to group modal -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal">
+    <h2>メンバーを追加</h2>
+    <div class="modal-form">
+      <input type="text" id="addMemberUsername" placeholder="ユーザー名を入力">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('addMemberModal')">キャンセル</button>
+      <button class="btn-primary" onclick="addMember()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image lightbox -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <img id="lightboxImg">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://trlwycaufsvyadikyusf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRybHd5Y2F1ZnN2eWFkaWt5dXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MDg0NTcsImV4cCI6MjA5NTA4NDQ1N30.KKcF4zFbY1O3SOq4NEJ0YDd4ZETaIJH0famargjM20A';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let currentChannelId = null;
+let currentView = 'channels';
+let channels = [];
+let dmChannels = [];
+let members = {};
+let msgSubscription = null;
+let selectedImage = null;
+let emojiTarget = null;
+
+const EMOJIS = ['👍','❤️','😂','😮','😢','😡','🎉','🔥','👀','✅','💯','🙏','😍','🤔','👏','😭'];
+
+// ===== AUTH =====
+function switchTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+  document.getElementById('loginForm').style.display = tab==='login' ? 'flex' : 'none';
+  document.getElementById('registerForm').style.display = tab==='register' ? 'flex' : 'none';
+  hideAuthError();
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.classList.add('show');
+}
+function hideAuthError() { document.getElementById('authError').classList.remove('show'); }
+
+async function login() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!email || !password) return showAuthError('メールアドレスとパスワードを入力してください');
+  const btn = document.querySelector('#loginForm .btn-primary');
+  btn.disabled = true; btn.textContent = 'ログイン中...';
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  btn.disabled = false; btn.textContent = 'ログイン';
+  if (error) return showAuthError('メールアドレスまたはパスワードが違います');
+}
+
+async function register() {
+  const username = document.getElementById('regUsername').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  if (!username || !email || !password) return showAuthError('すべての項目を入力してください');
+  if (password.length < 8) return showAuthError('パスワードは8文字以上にしてください');
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) return showAuthError('ユーザー名は半角英数字とアンダーバーのみ使えます');
+  const btn = document.querySelector('#registerForm .btn-primary');
+  btn.disabled = true; btn.textContent = '作成中...';
+  // Check username taken
+  const { data: existing } = await sb.from('profiles').select('id').eq('username', username).single();
+  if (existing) { btn.disabled = false; btn.textContent = 'アカウント作成'; return showAuthError('このユーザー名は既に使われています'); }
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) { btn.disabled = false; btn.textContent = 'アカウント作成'; return showAuthError(error.message); }
+  if (data.user) {
+    await sb.from('profiles').insert({ id: data.user.id, username });
+  }
+  btn.disabled = false; btn.textContent = 'アカウント作成';
+  showToast('アカウントを作成しました！');
+}
+
+async function logout() {
+  await sb.auth.signOut();
+  location.reload();
+}
+
+// ===== INIT =====
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    await loadProfile();
+    showApp();
+  } else {
+    currentUser = null;
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('app').classList.remove('visible');
+  }
+});
+
+async function loadProfile() {
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data) {
+    currentProfile = data;
+    document.getElementById('myUsernameSm').textContent = data.username;
+    const av = document.getElementById('myAvatarSm');
+    if (data.avatar_url) {
+      av.innerHTML = `<img src="${data.avatar_url}"><div class="online-dot"></div>`;
+    } else {
+      av.innerHTML = `<span>${data.username[0].toUpperCase()}</span><div class="online-dot"></div>`;
+    }
+  }
+}
+
+async function showApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('app').classList.add('visible');
+  await loadChannels();
+  setupRealtimeMessages();
+}
+
+// ===== CHANNELS =====
+async function loadChannels() {
+  // Public channels
+  const { data: pub } = await sb.from('channels').select('*').eq('type', 'public').order('created_at');
+  // Group channels I'm member of
+  const { data: myGroups } = await sb.from('channel_members').select('channel_id, channels(*)').eq('user_id', currentUser.id);
+  const groups = myGroups?.filter(m => m.channels?.type === 'group').map(m => m.channels) || [];
+  // DM channels
+  const { data: myDms } = await sb.from('channel_members').select('channel_id, channels(*)').eq('user_id', currentUser.id);
+  dmChannels = myDms?.filter(m => m.channels?.type === 'dm').map(m => m.channels) || [];
+  channels = [...(pub || []), ...groups];
+  renderChannelList();
+  if (currentView === 'dm') renderDmList();
+}
+
+function renderChannelList() {
+  const list = document.getElementById('channelList');
+  document.getElementById('sidebarTitle').textContent = 'Class room';
+  list.innerHTML = '';
+
+  // Public section
+  const pubHeader = document.createElement('div');
+  pubHeader.className = 'channel-section-title';
+  pubHeader.innerHTML = `<span>テキストチャンネル</span><button onclick="openModal('createChannelModal')" title="チャンネル作成">+</button>`;
+  list.appendChild(pubHeader);
+
+  channels.filter(c => c.type === 'public').forEach(c => {
+    list.appendChild(makeChannelItem(c, '#', c.name));
+  });
+
+  // Group section
+  const grpHeader = document.createElement('div');
+  grpHeader.className = 'channel-section-title';
+  grpHeader.innerHTML = `<span>グループ</span><button onclick="openModal('createChannelModal')" title="グループ作成">+</button>`;
+  list.appendChild(grpHeader);
+
+  channels.filter(c => c.type === 'group').forEach(c => {
+    list.appendChild(makeChannelItem(c, '👥', c.name));
+  });
+}
+
+function makeChannelItem(c, icon, name) {
+  const item = document.createElement('div');
+  item.className = 'channel-item' + (currentChannelId === c.id ? ' active' : '');
+  item.innerHTML = `<span class="ch-icon">${icon}</span><span class="ch-name">${name}</span>`;
+  item.onclick = () => openChannel(c);
+  return item;
+}
+
+async function openChannel(c) {
+  currentChannelId = c.id;
+  document.getElementById('chatIcon').textContent = c.type === 'group' ? '👥' : '#';
+  document.getElementById('chatTitle').textContent = c.name;
+  document.getElementById('chatDesc').textContent = c.type === 'public' ? '全体チャンネル' : c.type === 'group' ? 'グループ' : 'DM';
+  document.querySelectorAll('.channel-item, .dm-item').forEach(el => el.classList.remove('active'));
+  event?.target?.closest('.channel-item, .dm-item')?.classList.add('active');
+  await loadMessages();
+  if (c.type !== 'dm') loadMembers(c.id);
+  else document.getElementById('membersSidebar').innerHTML = '';
+}
+
+// ===== DM =====
+function renderDmList() {
+  const list = document.getElementById('channelList');
+  document.getElementById('sidebarTitle').textContent = 'ダイレクトメッセージ';
+  list.innerHTML = '';
+  const header = document.createElement('div');
+  header.className = 'channel-section-title';
+  header.innerHTML = `<span>ダイレクトメッセージ</span><button onclick="openModal('newDmModal')" title="新規DM">+</button>`;
+  list.appendChild(header);
+  dmChannels.forEach(c => {
+    const item = document.createElement('div');
+    item.className = 'dm-item' + (currentChannelId === c.id ? ' active' : '');
+    const name = c.name.replace('dm-', '').replace(currentProfile?.username || '', '').replace('-', '') || c.name;
+    item.innerHTML = `<div class="dm-avatar">${name[0]?.toUpperCase() || '?'}</div><span>${name}</span>`;
+    item.onclick = () => openChannel(c);
+    list.appendChild(item);
+  });
+}
+
+async function startDm() {
+  const username = document.getElementById('dmUsername').value.trim();
+  if (!username) return;
+  const { data: target } = await sb.from('profiles').select('*').eq('username', username).single();
+  if (!target) return showToast('ユーザーが見つかりません');
+  if (target.id === currentUser.id) return showToast('自分にはDMできません');
+  // Check existing DM
+  const { data: existing } = await sb.from('channel_members')
+    .select('channel_id, channels(*)').eq('user_id', currentUser.id);
+  const existingDm = existing?.find(m => m.channels?.type === 'dm' && m.channels?.name.includes(target.id));
+  if (existingDm) { closeModal('newDmModal'); return openChannel(existingDm.channels); }
+  // Create DM channel
+  const { data: ch } = await sb.from('channels').insert({ name: `dm-${currentUser.id}-${target.id}`, type: 'dm', created_by: currentUser.id }).select().single();
+  await sb.from('channel_members').insert([{ channel_id: ch.id, user_id: currentUser.id }, { channel_id: ch.id, user_id: target.id }]);
+  closeModal('newDmModal');
+  await loadChannels();
+  openChannel(ch);
+}
+
+// ===== CREATE CHANNEL =====
+async function createChannel() {
+  const name = document.getElementById('newChannelName').value.trim();
+  const type = document.getElementById('newChannelType').value;
+  if (!name) return;
+  const { data: ch } = await sb.from('channels').insert({ name, type, created_by: currentUser.id }).select().single();
+  if (type === 'group') {
+    await sb.from('channel_members').insert({ channel_id: ch.id, user_id: currentUser.id });
+  }
+  closeModal('createChannelModal');
+  await loadChannels();
+  openChannel(ch);
+}
+
+// ===== MESSAGES =====
+async function loadMessages() {
+  const wrap = document.getElementById('messagesWrap');
+  wrap.innerHTML = '<div class="loading-msg">読み込み中...</div>';
+  const { data } = await sb.from('messages').select('*, profiles(username, avatar_url)').eq('channel_id', currentChannelId).order('created_at', { ascending: true }).limit(100);
+  renderMessages(data || []);
+  wrap.scrollTop = wrap.scrollHeight;
+  // Mark as read
+  markAsRead(data || []);
+}
+
+function renderMessages(msgs) {
+  const wrap = document.getElementById('messagesWrap');
+  wrap.innerHTML = '';
+  if (msgs.length === 0) { wrap.innerHTML = '<div class="loading-msg">まだメッセージがありません。最初のメッセージを送りましょう！</div>'; return; }
+  let lastDate = '';
+  msgs.forEach(m => {
+    const date = new Date(m.created_at).toLocaleDateString('ja-JP');
+    if (date !== lastDate) {
+      const div = document.createElement('div'); div.className = 'date-divider'; div.textContent = date;
+      wrap.appendChild(div); lastDate = date;
+    }
+    wrap.appendChild(makeMsgEl(m));
+  });
+}
+
+function makeMsgEl(m) {
+  const group = document.createElement('div');
+  group.className = 'msg-group';
+  group.dataset.id = m.id;
+  const username = m.profiles?.username || '不明';
+  const avatarUrl = m.profiles?.avatar_url;
+  const initial = username[0]?.toUpperCase() || '?';
+  const time = new Date(m.created_at).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  const isMe = m.user_id === currentUser?.id;
+  const reactions = m.reactions || {};
+  const isRead = (m.read_by || []).length > 1;
+
+  const avatarHtml = avatarUrl ? `<img src="${avatarUrl}">` : initial;
+  const reactionsHtml = Object.entries(reactions).filter(([,v])=>v.length>0).map(([emoji, users]) =>
+    `<button class="reaction-btn ${users.includes(currentUser?.id)?'mine':''}" onclick="toggleReaction('${m.id}','${emoji}')">${emoji} ${users.length}</button>`
+  ).join('');
+
+  group.innerHTML = `
+    <div class="msg-avatar" onclick="showProfile('${m.user_id}')">${avatarHtml}</div>
+    <div class="msg-body">
+      <div class="msg-meta">
+        <span class="msg-name" onclick="showProfile('${m.user_id}')">${username}</span>
+        <span class="msg-time">${time}${isRead ? ' ✓✓' : ''}</span>
+      </div>
+      ${m.content ? `<div class="msg-text">${escHtml(m.content)}</div>` : ''}
+      ${m.image_url ? `<img class="msg-image" src="${m.image_url}" onclick="openLightbox('${m.image_url}')">` : ''}
+      <div class="msg-reactions">
+        ${reactionsHtml}
+        <button class="add-reaction-btn" onclick="showEmojiPickerForMsg(event,'${m.id}')">😊+</button>
+      </div>
+    </div>
+    <div class="msg-actions">
+      <button class="msg-action-btn" onclick="showEmojiPickerForMsg(event,'${m.id}')" title="リアクション">😊</button>
+      ${isMe ? `<button class="msg-action-btn danger" onclick="deleteMsg('${m.id}')" title="削除">🗑️</button>` : ''}
+    </div>
+  `;
+  return group;
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const content = input.value.trim();
+  if (!content && !selectedImage) return;
+  if (!currentChannelId) return showToast('チャンネルを選択してください');
+  input.value = ''; autoResize(input);
+
+  let imageUrl = null;
+  if (selectedImage) {
+    const ext = selectedImage.name.split('.').pop();
+    const path = `${currentUser.id}/${Date.now()}.${ext}`;
+    const { error } = await sb.storage.from('chat-images').upload(path, selectedImage);
+    if (!error) {
+      const { data: urlData } = sb.storage.from('chat-images').getPublicUrl(path);
+      imageUrl = urlData.publicUrl;
+    }
+    clearImage();
+  }
+
+  await sb.from('messages').insert({ channel_id: currentChannelId, user_id: currentUser.id, content: content || null, image_url: imageUrl, read_by: [currentUser.id] });
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 200) + 'px'; }
+
+async function deleteMsg(id) {
+  if (!confirm('このメッセージを削除しますか？')) return;
+  await sb.from('messages').delete().eq('id', id).eq('user_id', currentUser.id);
+  document.querySelector(`[data-id="${id}"]`)?.remove();
+}
+
+async function markAsRead(msgs) {
+  const unread = msgs.filter(m => !(m.read_by || []).includes(currentUser.id));
+  for (const m of unread) {
+    const newReadBy = [...(m.read_by || []), currentUser.id];
+    await sb.from('messages').update({ read_by: newReadBy }).eq('id', m.id);
+  }
+}
+
+// ===== REALTIME =====
+function setupRealtimeMessages() {
+  if (msgSubscription) sb.removeChannel(msgSubscription);
+  msgSubscription = sb.channel('messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async payload => {
+    if (payload.new.channel_id !== currentChannelId) return;
+    const { data: profile } = await sb.from('profiles').select('username, avatar_url').eq('id', payload.new.user_id).single();
+    const msg = { ...payload.new, profiles: profile };
+    const wrap = document.getElementById('messagesWrap');
+    const empty = wrap.querySelector('.loading-msg');
+    if (empty) empty.remove();
+    wrap.appendChild(makeMsgEl(msg));
+    wrap.scrollTop = wrap.scrollHeight;
+    if (msg.user_id !== currentUser.id) {
+      const newReadBy = [...(msg.read_by || []), currentUser.id];
+      await sb.from('messages').update({ read_by: newReadBy }).eq('id', msg.id);
+    }
+  }).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages' }, payload => {
+    if (payload.new.channel_id !== currentChannelId) return;
+    const el = document.querySelector(`[data-id="${payload.new.id}"]`);
+    if (!el) return;
+    const reactions = payload.new.reactions || {};
+    const reactDiv = el.querySelector('.msg-reactions');
+    if (reactDiv) {
+      const addBtn = reactDiv.querySelector('.add-reaction-btn');
+      reactDiv.innerHTML = '';
+      Object.entries(reactions).filter(([,v])=>v.length>0).forEach(([emoji, users]) => {
+        const btn = document.createElement('button');
+        btn.className = 'reaction-btn' + (users.includes(currentUser?.id) ? ' mine' : '');
+        btn.innerHTML = `${emoji} ${users.length}`;
+        btn.onclick = () => toggleReaction(payload.new.id, emoji);
+        reactDiv.appendChild(btn);
+      });
+      if (addBtn) reactDiv.appendChild(addBtn);
+    }
+  }).subscribe();
+}
+
+// ===== REACTIONS =====
+async function toggleReaction(msgId, emoji) {
+  const { data: msg } = await sb.from('messages').select('reactions').eq('id', msgId).single();
+  const reactions = msg.reactions || {};
+  const users = reactions[emoji] || [];
+  if (users.includes(currentUser.id)) {
+    reactions[emoji] = users.filter(u => u !== currentUser.id);
+  } else {
+    reactions[emoji] = [...users, currentUser.id];
+  }
+  await sb.from('messages').update({ reactions }).eq('id', msgId);
+}
+
+function showEmojiPickerForMsg(e, msgId) {
+  e.stopPropagation();
+  emojiTarget = msgId;
+  showEmojiPicker(e.clientX, e.clientY);
+}
+
+function toggleEmojiPicker(e) {
+  e.stopPropagation();
+  emojiTarget = null;
+  const picker = document.getElementById('emojiPicker');
+  if (picker.style.display === 'grid') { picker.style.display = 'none'; return; }
+  showEmojiPicker(e.clientX, e.clientY - 200);
+}
+
+function showEmojiPicker(x, y) {
+  const picker = document.getElementById('emojiPicker');
+  picker.innerHTML = EMOJIS.map(e => `<button class="emoji-btn" onclick="selectEmoji('${e}')">${e}</button>`).join('');
+  picker.style.display = 'grid';
+  picker.style.left = Math.min(x, window.innerWidth - 280) + 'px';
+  picker.style.top = Math.max(y - 160, 8) + 'px';
+}
+
+function selectEmoji(emoji) {
+  document.getElementById('emojiPicker').style.display = 'none';
+  if (emojiTarget) { toggleReaction(emojiTarget, emoji); emojiTarget = null; }
+  else {
+    const input = document.getElementById('msgInput');
+    input.value += emoji; input.focus();
+  }
+}
+
+document.addEventListener('click', () => { document.getElementById('emojiPicker').style.display = 'none'; });
+
+// ===== MEMBERS =====
+async function loadMembers(channelId) {
+  const sidebar = document.getElementById('membersSidebar');
+  const { data } = await sb.from('channel_members').select('user_id, profiles(username, avatar_url)').eq('channel_id', channelId);
+  sidebar.innerHTML = '<div class="members-section-title">メンバー — ' + (data?.length || 0) + '</div>';
+  data?.forEach(m => {
+    const el = document.createElement('div');
+    el.className = 'member-item';
+    const av = m.profiles?.avatar_url ? `<img src="${m.profiles.avatar_url}">` : (m.profiles?.username?.[0]?.toUpperCase() || '?');
+    el.innerHTML = `<div class="member-avatar">${av}</div><span class="member-name">${m.profiles?.username || '不明'}</span>`;
+    sidebar.appendChild(el);
+  });
+  // Add member button for group
+  const ch = channels.find(c => c.id === channelId);
+  if (ch?.type === 'group') {
+    const btn = document.createElement('button');
+    btn.className = 'btn-primary'; btn.style.cssText = 'margin:12px 8px;width:calc(100%-16px);font-size:13px;padding:8px;';
+    btn.textContent = 'メンバーを追加'; btn.onclick = () => openModal('addMemberModal');
+    sidebar.appendChild(btn);
+  }
+}
+
+async function addMember() {
+  const username = document.getElementById('addMemberUsername').value.trim();
+  if (!username) return;
+  const { data: target } = await sb.from('profiles').select('*').eq('username', username).single();
+  if (!target) return showToast('ユーザーが見つかりません');
+  await sb.from('channel_members').insert({ channel_id: currentChannelId, user_id: target.id });
+  closeModal('addMemberModal');
+  loadMembers(currentChannelId);
+  showToast(`${username} を追加しました！`);
+}
+
+// ===== IMAGE =====
+function triggerImageUpload() { document.getElementById('imageInput').click(); }
+function handleImageSelect(e) {
+  selectedImage = e.target.files[0];
+  if (!selectedImage) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    document.getElementById('previewImg').src = ev.target.result;
+    document.getElementById('imagePreview').style.display = 'flex';
+    document.getElementById('imagePreview').style.alignItems = 'center';
+  };
+  reader.readAsDataURL(selectedImage);
+}
+function clearImage() {
+  selectedImage = null;
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('imageInput').value = '';
+}
+
+// ===== LIGHTBOX =====
+function openLightbox(url) {
+  document.getElementById('lightboxImg').src = url;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+// ===== VIEW =====
+function setView(view) {
+  currentView = view;
+  currentChannelId = null;
+  document.getElementById('messagesWrap').innerHTML = '<div class="loading-msg">チャンネルを選択してください</div>';
+  document.getElementById('membersSidebar').innerHTML = '';
+  if (view === 'channels') renderChannelList();
+  else renderDmList();
+}
+
+// ===== UTILS =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(el => el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); }));
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openSettings() { showToast('設定機能は近日公開予定です'); }
+function showProfile(userId) {}
+
+// ===== Supabase Storage bucket setup notice =====
+// chat-images バケットをSupabaseのStorageで作成してください（public）
+</script>
+</body>
+</html>
