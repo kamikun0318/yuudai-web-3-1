@@ -269,7 +269,7 @@
     user_uuid: uid 
   });
   if (game && game.link) {
-    window.open(game.link, '_blank');
+  window.location.href = game.link;
   } else {
     window.location.href = `play.html?game=${key}`;
   }
