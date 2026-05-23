@@ -263,12 +263,17 @@
 
     // ── 4. プレイ処理 ──
     async function play(key) {
-      await supabaseClient.rpc('increment_game_play', { 
-        target_game_key: key, 
-        user_uuid: uid 
-      });
-      window.location.href = `play.html?game=${key}`;
-    }
+  const game = allGames.find(g => g.key === key);
+  await supabaseClient.rpc('increment_game_play', { 
+    target_game_key: key, 
+    user_uuid: uid 
+  });
+  if (game && game.link) {
+    window.open(game.link, '_blank');
+  } else {
+    window.location.href = `play.html?game=${key}`;
+  }
+}
 
     // ── 5. メイン描画 ──
     function render() {
