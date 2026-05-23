@@ -342,7 +342,7 @@ async function login() {
   if (!id||!pw) return showErr('IDとパスワードを入力してください');
   const btn = document.querySelector('#loginForm .btn-primary');
   btn.disabled=true; btn.textContent='ログイン中...';
-  const email = id+'@yuudai.app';
+  const email = id+'@gmail.com';
   const {error} = await sb.auth.signInWithPassword({email, password:pw});
   btn.disabled=false; btn.textContent='ログイン';
   if (error) return showErr('IDまたはパスワードが違います');
@@ -358,7 +358,7 @@ async function register() {
   btn.disabled=true; btn.textContent='作成中...';
   const {data:ex} = await sb.from('profiles').select('id').eq('username',id).maybeSingle();
   if (ex) { btn.disabled=false; btn.textContent='アカウント作成'; return showErr('このIDは既に使われています'); }
-  const email = id+'@yuudai.app';
+  const email = id+'@gmail.com';
   const {data, error} = await sb.auth.signUp({email, password:pw});
   if (error) { btn.disabled=false; btn.textContent='アカウント作成'; return showErr('登録に失敗しました: '+error.message); }
   if (data.user) await sb.from('profiles').insert({id:data.user.id, username:id});
