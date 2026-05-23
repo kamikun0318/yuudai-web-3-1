@@ -1407,6 +1407,38 @@ app.get("/helios", (req, res) => {
 app.get("/chat", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chat/chat.html"));
 });
+app.post('/api/chat/register', express.json(), async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: '入力が不正です' });
+  if (!/^[a-zA-Z0-9_]+$/.test(username)) return res.status(400).json({ error: 'IDは半角英数字のみ使えます' });
+  if (password.length < 8) return res.status(400).json({ error: 'パスワードは8文字以上' });
+  const { createClient } = require('@supabase/supabase-js');
+  const sb = createClient('https://trlwycaufsvyadikyusf.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRybHd5Y2F1ZnN2eWFkaWt5dXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MDg0NTcsImV4cCI6MjA5NTA4NDQ1N30.KKcF4zFbY1O3SOq4NEJ0YDd4ZETaIJH0famargjM20A');
+  const { data: ex } = await sb.from('profiles').select('id').eq('username', username).maybeSingle();
+  if (ex) return res.status(400).json({ error: 'このIDは既に使われています' });
+  const hash = await bcrypt.hash(password, 10);
+  const fakeEmail = `${username}@yuudai.local`;
+  const { data: signUp, error } = await sb.auth.signUp({ email: fakeEmail, password: username + password });
+  if (error) return res.status(400).json({ error: error.message });
+  await sb.from('profiles').upsert({ id: signUp.user.id, username, password_hash: hash });
+  const { data: signIn } = await sb.auth.signInWithPassword({ email: fakeEmail, password: username + password });
+  res.json({ access_token: signIn.session.access_token, refresh_token: signIn.session.refresh_token, user: { id: signUp.user.id, username } });
+});
+
+app.post('/api/chat/login', express.json(), async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) return res.status(400).json({ error: '入力が不正です' });
+  const { createClient } = require('@supabase/supabase-js');
+  const sb = createClient('https://trlwycaufsvyadikyusf.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRybHd5Y2F1ZnN2eWFkaWt5dXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MDg0NTcsImV4cCI6MjA5NTA4NDQ1N30.KKcF4zFbY1O3SOq4NEJ0YDd4ZETaIJH0famargjM20A');
+  const { data: profile } = await sb.from('profiles').select('*').eq('username', username).maybeSingle();
+  if (!profile || !profile.password_hash) return res.status(400).json({ error: 'IDまたはパスワードが違います' });
+  const match = await bcrypt.compare(password, profile.password_hash);
+  if (!match) return res.status(400).json({ error: 'IDまたはパスワードが違います' });
+  const fakeEmail = `${username}@yuudai.local`;
+  const { data: signIn, error } = await sb.auth.signInWithPassword({ email: fakeEmail, password: username + password });
+  if (error) return res.status(400).json({ error: 'ログインに失敗しました' });
+  res.json({ access_token: signIn.session.access_token, refresh_token: signIn.session.refresh_token, user: { id: profile.id, username } });
+});
 app.get("/yuudai-chat", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "chat/yuudai-chat.html"));
 });
