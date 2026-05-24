@@ -361,9 +361,11 @@ async function register() {
   const email = id+'@gmail.com';
   const {data, error} = await sb.auth.signUp({email, password:pw});
   if (error) { btn.disabled=false; btn.textContent='アカウント作成'; return showErr('登録に失敗しました: '+error.message); }
-  if (data.user) await sb.from('profiles').insert({id:data.user.id, username:id});
-  btn.disabled=false; btn.textContent='アカウント作成';
-  showToast('アカウントを作成しました！');
+  
+  await sb.from('profiles').insert({id:data.user.id, username:id});if
+  
+  await sb.auth.signInWithPassword({email: id+'@gmail.com', password:pw});// 自動ログイン (data.user) {
+
 }
 
 async function logout() {
